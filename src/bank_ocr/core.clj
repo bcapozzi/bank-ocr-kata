@@ -1,6 +1,5 @@
 (ns bank-ocr.core)
 
-
 (def ZERO '((\space \_ \space) (\| \space \|) (\| \_ \|) (\space \space \space)))
 (def ONE '((\space \space \space) (\space \space \|) (\space \space \|) (\space \space \space)))
 (def TWO '((\space \_ \space) (\space \_ \|) (\| \_ \space) (\space \space \space)))
@@ -11,6 +10,7 @@
 (def SEVEN '((\space \_ \space) (\space \space \|) (\space \space \|) (\space \space \space)))
 (def EIGHT '((\space \_ \space) (\| \_ \|) (\| \_ \|) (\space \space \space)))
 (def NINE '((\space \_ \space) (\| \_ \|) (\space \_ \|) (\space \space \space)))
+(def INVALID_CHARACTER \?)
 
 (defn is-mark? [s]
   (println s)
@@ -77,7 +77,7 @@
    (= SEVEN s) "7"
    (= EIGHT s) "8"
    (= NINE s) "9"
-   :else "-1"
+   :else INVALID_CHARACTER
    )
   )
 
@@ -98,7 +98,7 @@
   (loop [sum 0
          value acct-number
          pos 1]
-    (println sum, value, pos)
+    
     (cond
      (empty? value) (mod sum 11)
      :else (recur (+ sum (* (-  (int (last value)) (int \0)) pos)) (drop-last value) (inc pos)) )
@@ -107,4 +107,15 @@
 
 (defn is-valid? [acct-number]
   (= 0 (checksum acct-number))
+  )
+
+(defn is-illegible? [acct-number]
+  (some #(= INVALID_CHARACTER %) acct-number))
+
+(defn create-log-entry-for [acct-number]
+  (cond
+   (is-illegible? acct-number) (str acct-number " ILL")
+   (is-valid? acct-number) acct-number
+   :else (str acct-number " ERR")
+   )
   )
