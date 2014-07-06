@@ -61,6 +61,15 @@
                 (should= "123456789" (convert scan-lines 3))
                 ))
 
+          (it "replaces unknown character patterns with an INVALID_CHARACTER marker"
+              (let [scan-lines '(
+                                 "    _  _     _  _  _  _  _ \n",
+                                 "  | _| _||_||_ |_   ||_||_|\n",
+                                 "  ||_  _   | _||_|   |_| _|\n",
+                                 "                           ")]
+                (should= "12?456?89" (convert scan-lines 3))
+                ))
+                    
           (it "can determine valid account numbers"
               (should= true (is-valid? "711111111"))
               (should= true (is-valid? "123456789"))
