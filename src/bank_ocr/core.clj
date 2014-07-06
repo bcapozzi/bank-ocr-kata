@@ -94,3 +94,17 @@
     )
   )
 
+(defn checksum [acct-number]
+  (loop [sum 0
+         value acct-number
+         pos 1]
+    (println sum, value, pos)
+    (cond
+     (empty? value) (mod sum 11)
+     :else (recur (+ sum (* (-  (int (last value)) (int \0)) pos)) (drop-last value) (inc pos)) )
+    )
+  )
+
+(defn is-valid? [acct-number]
+  (= 0 (checksum acct-number))
+  )

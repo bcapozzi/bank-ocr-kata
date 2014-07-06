@@ -61,5 +61,15 @@
                 (should= "123456789" (convert scan-lines 3))
                 ))
 
-
+          (it "can determine valid account numbers"
+              (should= true (is-valid? "711111111"))
+              (should= true (is-valid? "123456789"))
+              (should= true (is-valid? "490867715"))
+              )
+          
+          (it "can determine invalid account numbers"
+              (should= false (is-valid? "888888888"))
+              (should= false (is-valid? "490067715"))
+              (should= false (is-valid? "012345678"))
+              )
           )
