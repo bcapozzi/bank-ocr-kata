@@ -94,4 +94,66 @@
           (it "can create a log entry for an invalid account number"
               (should= "111111111 ERR" (create-log-entry-for "111111111"))
               )
+
+          
+          ;; User Story 4 - handle ambiguous account numbers by suggesting
+          ;; alternate, valid account numbers
+
+          (it "can replace character at position within account number"
+              (should= "923456789" (replace-at-posn-with "123456789" 0 9))
+              (should= "193456789" (replace-at-posn-with "123456789" 1 9))
+              (should= "123456799" (replace-at-posn-with "123456789" 7 9))
+              (should= "123456781" (replace-at-posn-with "123456789" 8 1))
+              )
+
+          
+          (it "can find a valid alternate account number for one that is invalid"
+              (let [scan-lines '(
+                                 "                           \n",
+                                 "  |  |  |  |  |  |  |  |  |\n",
+                                 "  |  |  |  |  |  |  |  |  |\n",                                 
+                                 "                           ")]
+                (should= 1 (count (convert-and-replace scan-lines 3)))                               
+                (should-contain "711111111" (convert-and-replace scan-lines 3))
+               
+                )
+
+              (let [scan-lines '(
+                                 " _  _  _  _  _  _  _  _  _ \n", 
+                                 "  |  |  |  |  |  |  |  |  |\n",
+                                 "  |  |  |  |  |  |  |  |  |\n",
+                                 "                           ")]
+                (should= 1 (count (convert-and-replace scan-lines 3)))               
+                (should-contain "777777177" (convert-and-replace scan-lines 3))
+               
+                )
+
+              (let [scan-lines '(
+                                 " _  _  _  _  _  _  _  _  _ \n", 
+                                 " _|| || || || || || || || |\n",
+                                 "|_ |_||_||_||_||_||_||_||_|\n",
+                                 "                           ")]
+                (should= 1 (count (convert-and-replace scan-lines 3)))               
+                (should-contain "200800000" (convert-and-replace scan-lines 3))
+                )
+
+
+
+              )
+
+          (it "can find multiple alternates for ambiguous account numbers"
+              (let [scan-lines '(
+                                 " _  _  _  _  _  _  _  _  _ \n", 
+                                 "|_||_||_||_||_||_||_||_||_|\n",
+                                 "|_||_||_||_||_||_||_||_||_|\n",
+                                 "                           ")]
+                (should= 3 (count (convert-and-replace scan-lines 3)))
+                (should-contain "888886888" (convert-and-replace scan-lines 3))
+                (should-contain "888888880" (convert-and-replace scan-lines 3))
+                (should-contain "888888988" (convert-and-replace scan-lines 3))
+                )
+              )
           )
+
+
+

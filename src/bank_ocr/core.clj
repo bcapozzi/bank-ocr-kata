@@ -12,6 +12,18 @@
 (def NINE '((\space \_ \space) (\| \_ \|) (\space \_ \|) (\space \space \space)))
 (def INVALID_CHARACTER \?)
 
+(def char-map
+  {:0 ZERO
+   :1 ONE
+   :2 TWO
+   :3 THREE
+   :4 FOUR
+   :5 FIVE
+   :6 SIX
+   :7 SEVEN
+   :8 EIGHT
+   :9 NINE})
+
 (defn is-mark? [s]
   (println s)
   (or (= \| s) (= \_ s))
@@ -64,6 +76,10 @@
   )
 
 
+(defn to-scan-char [digit]
+  ((keyword (str digit)) char-map)
+  )
+
 (defn to-digit [s]
 
   (cond
@@ -81,11 +97,15 @@
    )
   )
 
+(defn to-scan-chars [scan-lines]
+  (for [i (range 9)]
+    (to-matrix scan-lines i))
+  )
 
 (defn convert [scan-lines ncols-per-char]
   (let [ncols  (count  (clojure.string/trim-newline (first scan-lines)))
         nchars-per-line (/ ncols ncols-per-char)
-        scan-chars (for [i (range 9)](to-matrix scan-lines i)) ]
+        scan-chars (to-scan-chars scan-lines)]
 
     (apply str  (for [s scan-chars]
                   (to-digit s)
@@ -106,7 +126,12 @@
   )
 
 (defn is-valid? [acct-number]
-  (= 0 (checksum acct-number))
+  (cond
+   (nil? acct-number) false
+   (empty? acct-number) false
+   :else
+     (= 0 (checksum acct-number))
+   )
   )
 
 (defn is-illegible? [acct-number]
@@ -118,4 +143,80 @@
    (is-valid? acct-number) acct-number
    :else (str acct-number " ERR")
    )
+  )
+
+(defn replace-at-posn-with [acct-number pos c]
+  (let [p1 (apply str (take pos acct-number))
+        p3 (apply str (drop (inc pos) acct-number))]
+
+    (apply str p1 c p3)
+    )
+  )
+
+(defn construct-alternates-with [acct-number c]
+  (map #(replace-at-posn-with acct-number % c) (range (count acct-number)))
+  )
+
+
+(defn diff [s1 s2]
+  (loop [n 0
+         s1 (flatten s1)
+         s2 (flatten s2)]
+    
+    (cond
+     (empty? s1) n
+     (not= (first s1) (first s2)) (recur (inc n) (drop 1 s1) (drop 1 s2))
+     :else (recur n (drop 1 s1) (drop 1 s2))
+     )
+    )
+  )
+
+(defn find-chars-close-to [scan-char]
+  (filter #(= 1 ( diff scan-char (val %))) char-map )
+  )
+
+(defn find-valid-alternates [acct-number]
+
+   (for [n (range 10)]
+      (filter #(is-valid? %) (construct-alternates-with acct-number n))
+    )
+  )
+
+(defn to-digits [scan-chars]
+  (apply str 
+         (for [s scan-chars]
+           (to-digit s)))
+  )
+
+(defn to-account-number [p1 c p2]
+  (let [a1 (to-digits p1)
+        ac (to-digits [c])
+        a2 (to-digits p2)]
+    (apply str a1 ac a2)
+    )
+  )
+
+(defn construct-alternate-numbers-at-posn [scan-chars posn]
+  (let [r (find-chars-close-to (nth scan-chars posn))
+        p1 (vec  (take posn scan-chars))
+        p2 (vec  (drop (inc posn) scan-chars))]
+
+    (for [c (vals r)]
+      (to-account-number p1 c p2)
+      )
+    )
+  )
+
+
+(defn convert-and-replace [scan-lines n]
+  (let [scan-chars (to-scan-chars scan-lines)
+        acct-num (convert scan-lines n)]
+
+    (flatten 
+     (for [i (range (count scan-chars))]
+       (filter #(is-valid? %) (construct-alternate-numbers-at-posn scan-chars i))
+       ))
+    
+    )
+  
   )
