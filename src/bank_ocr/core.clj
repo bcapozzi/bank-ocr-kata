@@ -125,17 +125,19 @@
     )
   )
 
+(defn is-illegible? [acct-number]
+  (some #(= INVALID_CHARACTER %) acct-number))
+
 (defn is-valid? [acct-number]
   (cond
    (nil? acct-number) false
    (empty? acct-number) false
+   (is-illegible? acct-number) false
    :else
      (= 0 (checksum acct-number))
    )
   )
 
-(defn is-illegible? [acct-number]
-  (some #(= INVALID_CHARACTER %) acct-number))
 
 (defn create-log-entry-for [acct-number]
   (cond
@@ -215,8 +217,7 @@
     (flatten 
      (for [i (range (count scan-chars))]
        (filter #(is-valid? %) (construct-alternate-numbers-at-posn scan-chars i))
-       ))
-    
+       ))  
     )
   
   )

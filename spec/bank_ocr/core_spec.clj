@@ -153,6 +153,17 @@
                 (should-contain "888888988" (convert-and-replace scan-lines 3))
                 )
               )
+
+          (it "can find replacement for illegible account number"
+              (let [scan-lines '(
+                                "    _  _     _  _  _  _  _ \n", 
+                                " _| _| _||_||_ |_   ||_||_|\n",
+                                "  ||_  _|  | _||_|  ||_| _|\n", 
+                                "                           ")]
+                
+                (should= 1 (count (convert-and-replace scan-lines 3)))
+                (should-contain "123456789" (convert-and-replace scan-lines 3)))
+              )
           )
 
 
