@@ -165,7 +165,7 @@
                 (should-contain "123456789" (convert-and-replace scan-lines 3)))
               )
 
-          (it "can find replacement for illegible account number case 2"
+          (it "can find multiple replacements for invalid account number case 2"
               (let [scan-lines '(
                                  "    _  _  _  _  _  _     _ \n", 
                                  "|_||_|| || ||_   |  |  ||_ \n", 
@@ -177,6 +177,17 @@
                 (should-contain "490067719" (convert-and-replace scan-lines 3))
                 (should-contain "490867715" (convert-and-replace scan-lines 3))
                
+                )
+              )
+
+          (it "can repair an erroneous scan case 2"
+              (let [scan-lines '(
+                                " _     _  _  _  _  _  _    \n",    
+                                "| || || || || || || ||_   |\n",
+                                "|_||_||_||_||_||_||_| _|  |\n",
+                                "                           ")]
+                (should= 1 (count (convert-and-replace scan-lines 3)))
+                (should-contain "000000051" (convert-and-replace scan-lines 3))
                 )
               )
           )
